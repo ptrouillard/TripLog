@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TripLog - Carnet de Voyages</title>
+    <meta
+      name="description"
+      content="TripLog: un blog visuel pour raconter vos voyages avec photos, videos et recits."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;500;700;800&family=Newsreader:opsz,wght@6..72,400;6..72,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-orb orb-a"></div>
+    <div class="bg-orb orb-b"></div>
+    <div class="grid-overlay"></div>
+
+    <header class="hero">
+      <nav class="topbar container">
+        <p class="brand">TripLog</p>
+        <a class="btn btn-light" href="admin.html">Back office</a>
+      </nav>
+
+      <section class="hero-content container reveal">
+        <p class="kicker">CARNET DE VOYAGES</p>
+        <h1>Transforme tes voyages en histoires vivantes.</h1>
+        <p class="hero-text">
+          Une mise en page blog pensee pour melanger texte, photos et videos, avec une timeline claire
+          et un rendu moderne.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#timeline">Voir les aventures</a>
+          <a class="btn btn-ghost" href="#about">Comment ca marche</a>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section id="timeline" class="container timeline-section">
+        <div class="section-head reveal">
+          <h2>Dernieres etapes</h2>
+          <p>Chaque carte peut contenir un recit, un carrousel photo et une video integree.</p>
+        </div>
+
+        <div id="postGrid" class="post-grid"></div>
+      </section>
+
+      <section id="about" class="container about reveal">
+        <h2>Concu pour ton blog voyage</h2>
+        <div class="about-cards">
+          <article>
+            <h3>Recits longs ou courts</h3>
+            <p>
+              Raconte une journee en 3 lignes ou ecris un journal complet. Le layout garde un bon rythme
+              de lecture.
+            </p>
+          </article>
+          <article>
+            <h3>Photos immersives</h3>
+            <p>
+              Affiche des paysages en grand format et alterne avec des details de rue, de cuisine ou de
+              randonnee.
+            </p>
+          </article>
+          <article>
+            <h3>Videos integrees</h3>
+            <p>
+              Ajoute une video YouTube ou Vimeo dans chaque etape pour donner du mouvement au recit.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <p>TripLog - Ton blog de voyages visuel.</p>
+    </footer>
+
+    <script src="store.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

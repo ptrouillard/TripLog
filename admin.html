@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TripLog Admin - Back Office</title>
+    <meta name="description" content="Back office TripLog pour gerer les voyages." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Manrope:wght@400;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css" rel="stylesheet" />
+    <link rel="stylesheet" href="admin.css" />
+  </head>
+  <body>
+    <div class="admin-shell">
+      <header class="admin-topbar">
+        <div>
+          <p class="eyebrow">TRIPLOG BACK OFFICE</p>
+          <h1>Edition des voyages</h1>
+        </div>
+        <a class="btn btn-ghost" href="index.html">Voir le site public</a>
+      </header>
+
+      <main class="admin-layout">
+        <aside class="left-panel">
+          <div class="panel-head">
+            <h2>Voyages</h2>
+            <button id="newPostBtn" class="btn btn-primary" type="button">Nouveau</button>
+          </div>
+          <ul id="postList" class="post-list"></ul>
+        </aside>
+
+        <section class="editor-panel">
+          <form id="editorForm">
+            <input type="hidden" id="postId" />
+            <div class="field-grid">
+              <label>
+                Titre
+                <input id="title" required placeholder="Ex: Tokyo sous la pluie" />
+              </label>
+              <label>
+                Date
+                <input id="date" required placeholder="Ex: Avril 2026" />
+              </label>
+              <label>
+                Pays / Ville
+                <input id="location" required placeholder="Ex: Japon - Tokyo" />
+              </label>
+              <label>
+                URL image
+                <input id="image" type="url" required placeholder="https://images.unsplash.com/..." />
+              </label>
+              <label class="full-width">
+                URL video integree (optionnel)
+                <input id="video" type="url" placeholder="https://www.youtube.com/embed/..." />
+              </label>
+            </div>
+
+            <div class="rich-editor-wrap">
+              <p class="label-like">Contenu du recit (rich text)</p>
+              <div id="editor"></div>
+            </div>
+
+            <div class="actions">
+              <button id="deleteBtn" class="btn btn-danger" type="button">Supprimer</button>
+              <button class="btn btn-primary" type="submit">Enregistrer</button>
+            </div>
+            <p id="statusMsg" class="status"></p>
+          </form>
+        </section>
+      </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.min.js"></script>
+    <script src="store.js"></script>
+    <script src="admin.js"></script>
+  </body>
+</html>
