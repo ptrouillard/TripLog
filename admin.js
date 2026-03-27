@@ -3,6 +3,13 @@ const editorForm = document.getElementById("editorForm");
 const statusMsg = document.getElementById("statusMsg");
 const deleteBtn = document.getElementById("deleteBtn");
 const newPostBtn = document.getElementById("newPostBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const loginPanel = document.getElementById("loginPanel");
+const loginForm = document.getElementById("loginForm");
+const loginUsername = document.getElementById("loginUsername");
+const loginPassword = document.getElementById("loginPassword");
+const loginStatus = document.getElementById("loginStatus");
 
 const postIdInput = document.getElementById("postId");
 const titleInput = document.getElementById("title");
@@ -10,6 +17,8 @@ const dateInput = document.getElementById("date");
 const locationInput = document.getElementById("location");
 const imageInput = document.getElementById("image");
 const videoInput = document.getElementById("video");
+const imageFileInput = document.getElementById("imageFile");
+const uploadBtn = document.getElementById("uploadBtn");
 
 const quill = new Quill("#editor", {
   theme: "snow",
@@ -27,7 +36,8 @@ const quill = new Quill("#editor", {
 
 const state = {
   posts: [],
-  activeId: ""
+  activeId: "",
+  authenticated: false
 };
 
 function toPlainText(html) {
@@ -41,8 +51,23 @@ function setStatus(message, isError = false) {
   statusMsg.classList.toggle("error", isError);
 }
 
-function loadState() {
-  state.posts = window.TripStore.loadPosts();
+function setLoginStatus(message, isError = false) {
+  loginStatus.textContent = message;
+  loginStatus.classList.toggle("error", isError);
+}
+
+function applyAuthUi() {
+  if (state.authenticated) {
+    document.body.classList.remove("admin-locked");
+    loginPanel.classList.remove("visible");
+  } else {
+    document.body.classList.add("admin-locked");
+    loginPanel.classList.add("visible");
+  }
+}
+
+async function loadState() {
+  state.posts = await window.TripStore.loadPosts();
 }
 
 function renderPostList() {
@@ -127,7 +152,7 @@ newPostBtn.addEventListener("click", () => {
   resetForNewPost();
 });
 
-editorForm.addEventListener("submit", event => {
+editorForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   const payload = {
@@ -147,28 +172,110 @@ editorForm.addEventListener("submit", event => {
     return;
   }
 
-  const savedPost = window.TripStore.upsertPost(payload);
-  loadState();
-  setActivePost(savedPost.id);
-  setStatus("Voyage enregistre.");
+  try {
+    const savedPost = await window.TripStore.upsertPost(payload);
+    await loadState();
+    setActivePost(savedPost.id);
+    setStatus("Voyage enregistre en base.");
+  } catch (error) {
+    setStatus(error.message || "Erreur lors de l enregistrement.", true);
+  }
 });
 
-deleteBtn.addEventListener("click", () => {
+deleteBtn.addEventListener("click", async () => {
   const activeId = postIdInput.value.trim();
   if (!activeId) {
     return;
   }
 
-  window.TripStore.deletePost(activeId);
-  loadState();
-  resetForNewPost();
-  setStatus("Voyage supprime.");
+  try {
+    await window.TripStore.deletePost(activeId);
+    await loadState();
+    resetForNewPost();
+    setStatus("Voyage supprime.");
+  } catch (error) {
+    setStatus(error.message || "Erreur lors de la suppression.", true);
+  }
 });
 
-loadState();
-renderPostList();
-if (state.posts[0]) {
-  setActivePost(state.posts[0].id);
-} else {
-  resetForNewPost();
+loginForm.addEventListener("submit", async event => {
+  event.preventDefault();
+  setLoginStatus("Connexion en cours...");
+
+  try {
+    await window.TripStore.login(loginUsername.value.trim(), loginPassword.value);
+    state.authenticated = true;
+    applyAuthUi();
+    loginForm.reset();
+    setLoginStatus("");
+    await loadState();
+    renderPostList();
+
+    if (state.posts[0]) {
+      setActivePost(state.posts[0].id);
+    } else {
+      resetForNewPost();
+    }
+  } catch (error) {
+    setLoginStatus(error.message || "Identifiants invalides.", true);
+  }
+});
+
+logoutBtn.addEventListener("click", async () => {
+  try {
+    await window.TripStore.logout();
+  } catch {
+    // The UI is locked even if the session is already gone server-side.
+  }
+
+  state.authenticated = false;
+  applyAuthUi();
+  setStatus("Session fermee.");
+});
+
+uploadBtn.addEventListener("click", async () => {
+  const file = imageFileInput.files && imageFileInput.files[0];
+  if (!file) {
+    setStatus("Choisis une image avant l upload.", true);
+    return;
+  }
+
+  uploadBtn.disabled = true;
+  setStatus("Upload en cours...");
+
+  try {
+    const url = await window.TripStore.uploadImage(file);
+    imageInput.value = url;
+    setStatus("Image uploadée et URL renseignee.");
+  } catch (error) {
+    setStatus(error.message || "Erreur pendant l upload.", true);
+  } finally {
+    uploadBtn.disabled = false;
+  }
+});
+
+async function init() {
+  try {
+    state.authenticated = await window.TripStore.getAuthStatus();
+  } catch {
+    state.authenticated = false;
+  }
+
+  applyAuthUi();
+
+  if (!state.authenticated) {
+    setStatus("Connecte-toi pour gerer les voyages.");
+    return;
+  }
+
+  await loadState();
+  renderPostList();
+
+  if (state.posts[0]) {
+    setActivePost(state.posts[0].id);
+  } else {
+    resetForNewPost();
+  }
 }
+
+init();

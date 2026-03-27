@@ -30,6 +30,37 @@ body {
   min-height: 100vh;
 }
 
+body.admin-locked .admin-shell {
+  filter: blur(6px);
+  pointer-events: none;
+  user-select: none;
+}
+
+.login-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: none;
+  place-items: center;
+  background: rgba(1, 8, 14, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.login-panel.visible {
+  display: grid;
+}
+
+.login-card {
+  width: min(420px, 90vw);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(9, 27, 43, 0.98), rgba(11, 32, 49, 0.96));
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.45);
+  padding: 1rem;
+  display: grid;
+  gap: 0.7rem;
+}
+
 h1,
 h2,
 h3 {
@@ -49,6 +80,12 @@ h3 {
   align-items: end;
   gap: 1rem;
   margin-bottom: 1rem;
+}
+
+.top-actions {
+  display: flex;
+  gap: 0.55rem;
+  align-items: center;
 }
 
 .eyebrow {
@@ -165,6 +202,12 @@ label,
   grid-column: 1 / -1;
 }
 
+.upload-inline {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.45rem;
+}
+
 input {
   width: 100%;
   border: 1px solid var(--line);
@@ -265,5 +308,14 @@ input {
   .admin-topbar {
     flex-direction: column;
     align-items: start;
+  }
+
+  .top-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .upload-inline {
+    grid-template-columns: 1fr;
   }
 }

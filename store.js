@@ -1,4 +1,7 @@
 const TRIPLOG_STORAGE_KEY = "triplog.posts.v1";
+const TRIPLOG_API_URL = "api/posts.php";
+const TRIPLOG_AUTH_URL = "api/auth.php";
+const TRIPLOG_UPLOAD_URL = "api/upload.php";
 
 const defaultPosts = [
   {
@@ -46,6 +49,23 @@ function deepCopy(posts) {
   return JSON.parse(JSON.stringify(posts));
 }
 
+async function fetchJson(url, options) {
+  const response = await fetch(url, {
+    credentials: "same-origin",
+    ...options
+  });
+  if (!response.ok) {
+    throw new Error(`API request failed with status ${response.status}`);
+  }
+
+  const payload = await response.json();
+  if (!payload.ok) {
+    throw new Error(payload.error || "API request returned an error.");
+  }
+
+  return payload.data;
+}
+
 function buildSlug(value) {
   return value
     .toLowerCase()
@@ -71,11 +91,11 @@ function normalizePost(input) {
     video: (input.video || "").trim(),
     content,
     createdAt: input.createdAt || now,
-    updatedAt: now
+    updatedAt: input.updatedAt || now
   };
 }
 
-function loadPosts() {
+function loadPostsFromLocal() {
   const raw = localStorage.getItem(TRIPLOG_STORAGE_KEY);
   if (!raw) {
     return deepCopy(defaultPosts);
@@ -93,35 +113,94 @@ function loadPosts() {
   }
 }
 
-function savePosts(posts) {
+function savePostsToLocal(posts) {
   localStorage.setItem(TRIPLOG_STORAGE_KEY, JSON.stringify(posts));
 }
 
-function upsertPost(post) {
-  const posts = loadPosts();
-  const normalized = normalizePost(post);
-  const index = posts.findIndex(item => item.id === normalized.id);
-
-  if (index >= 0) {
-    normalized.createdAt = posts[index].createdAt || normalized.createdAt;
-    posts[index] = normalized;
-  } else {
-    posts.unshift(normalized);
+async function loadPosts() {
+  try {
+    const remotePosts = await fetchJson(TRIPLOG_API_URL, { method: "GET" });
+    const normalized = Array.isArray(remotePosts)
+      ? remotePosts.map(normalizePost)
+      : deepCopy(defaultPosts);
+    savePostsToLocal(normalized);
+    return normalized;
+  } catch {
+    return loadPostsFromLocal();
   }
-
-  savePosts(posts);
-  return normalized;
 }
 
-function deletePost(postId) {
-  const posts = loadPosts();
-  const nextPosts = posts.filter(post => post.id !== postId);
-  savePosts(nextPosts);
-  return nextPosts;
+function savePosts(posts) {
+  savePostsToLocal(posts.map(normalizePost));
 }
 
-function getPostById(postId) {
-  return loadPosts().find(post => post.id === postId) || null;
+async function upsertPost(post) {
+  const normalized = normalizePost(post);
+  const savedPost = await fetchJson(TRIPLOG_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(normalized)
+  });
+
+  const posts = await loadPosts();
+  savePostsToLocal(posts);
+  return normalizePost(savedPost);
+}
+
+async function deletePost(postId) {
+  await fetchJson(`${TRIPLOG_API_URL}?id=${encodeURIComponent(postId)}`, {
+    method: "DELETE"
+  });
+  const posts = await loadPosts();
+  savePostsToLocal(posts);
+  return posts;
+}
+
+async function getPostById(postId) {
+  const posts = await loadPosts();
+  return posts.find(post => post.id === postId) || null;
+}
+
+async function login(username, password) {
+  await fetchJson(TRIPLOG_AUTH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      action: "login",
+      username,
+      password
+    })
+  });
+}
+
+async function logout() {
+  await fetchJson(TRIPLOG_AUTH_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ action: "logout" })
+  });
+}
+
+async function getAuthStatus() {
+  const data = await fetchJson(TRIPLOG_AUTH_URL, { method: "GET" });
+  return Boolean(data?.authenticated);
+}
+
+async function uploadImage(file) {
+  const formData = new FormData();
+  formData.append("image", file);
+  const data = await fetchJson(TRIPLOG_UPLOAD_URL, {
+    method: "POST",
+    body: formData
+  });
+
+  return data.url || "";
 }
 
 window.TripStore = {
@@ -129,5 +208,9 @@ window.TripStore = {
   savePosts,
   upsertPost,
   deletePost,
-  getPostById
+  getPostById,
+  login,
+  logout,
+  getAuthStatus,
+  uploadImage
 };

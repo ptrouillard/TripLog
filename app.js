@@ -43,8 +43,8 @@ function createPostCard(post, index) {
   return card;
 }
 
-function renderPosts() {
-  state.posts = window.TripStore.loadPosts();
+async function renderPosts() {
+  state.posts = await window.TripStore.loadPosts();
   postGrid.innerHTML = "";
 
   state.posts.forEach((post, index) => {
@@ -68,5 +68,9 @@ function setupRevealOnScroll() {
   revealElements.forEach(element => observer.observe(element));
 }
 
-renderPosts();
-setupRevealOnScroll();
+async function init() {
+  await renderPosts();
+  setupRevealOnScroll();
+}
+
+init();

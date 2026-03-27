@@ -15,13 +15,33 @@
     <link rel="stylesheet" href="admin.css" />
   </head>
   <body>
+    <section id="loginPanel" class="login-panel">
+      <form id="loginForm" class="login-card">
+        <p class="eyebrow">ACCES RESTREINT</p>
+        <h2>Connexion back office</h2>
+        <label>
+          Identifiant
+          <input id="loginUsername" required autocomplete="username" />
+        </label>
+        <label>
+          Mot de passe
+          <input id="loginPassword" type="password" required autocomplete="current-password" />
+        </label>
+        <button class="btn btn-primary" type="submit">Se connecter</button>
+        <p id="loginStatus" class="status"></p>
+      </form>
+    </section>
+
     <div class="admin-shell">
       <header class="admin-topbar">
         <div>
           <p class="eyebrow">TRIPLOG BACK OFFICE</p>
           <h1>Edition des voyages</h1>
         </div>
-        <a class="btn btn-ghost" href="index.html">Voir le site public</a>
+        <div class="top-actions">
+          <a class="btn btn-ghost" href="index.html">Voir le site public</a>
+          <button id="logoutBtn" class="btn btn-ghost" type="button">Se deconnecter</button>
+        </div>
       </header>
 
       <main class="admin-layout">
@@ -52,6 +72,13 @@
               <label>
                 URL image
                 <input id="image" type="url" required placeholder="https://images.unsplash.com/..." />
+              </label>
+              <label>
+                Upload image
+                <div class="upload-inline">
+                  <input id="imageFile" type="file" accept="image/*" />
+                  <button id="uploadBtn" class="btn btn-ghost" type="button">Uploader</button>
+                </div>
               </label>
               <label class="full-width">
                 URL video integree (optionnel)
