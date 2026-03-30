@@ -8,14 +8,26 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DB_HOST: ${{ secrets.DB_HOST }}
+      DB_PORT: ${{ secrets.DB_PORT }}
+      DB_NAME: ${{ secrets.DB_NAME }}
+      DB_USER: ${{ secrets.DB_USER }}
+      DB_PASS: ${{ secrets.DB_PASS }}
+      ADMIN_USERNAME: ${{ secrets.ADMIN_USERNAME }}
+      ADMIN_PASSWORD: ${{ secrets.ADMIN_PASSWORD }}
+      FTP_HOST: ${{ secrets.FTP_HOST }}
+      FTP_USER: ${{ secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+      FTP_SERVER_DIR: ${{ secrets.FTP_SERVER_DIR }}
 
     steps:
       - name: Récupérer le code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Générer api/config.php depuis les secrets GitHub
         run: |
-          cat > api/config.php << 'PHP'
+          cat > api/config.php <<PHP
           <?php
           define('DB_HOST',         '${DB_HOST}');
           define('DB_PORT',         '${DB_PORT}');
@@ -26,24 +38,22 @@ jobs:
           define('ADMIN_PASSWORD',  '${ADMIN_PASSWORD}');
           PHP
 
-          # Substitution des placeholders par les vraies valeurs
-          sed -i "s|\${DB_HOST}|${{ secrets.DB_HOST }}|g"        api/config.php
-          sed -i "s|\${DB_PORT}|${{ secrets.DB_PORT }}|g"        api/config.php
-          sed -i "s|\${DB_NAME}|${{ secrets.DB_NAME }}|g"        api/config.php
-          sed -i "s|\${DB_USER}|${{ secrets.DB_USER }}|g"        api/config.php
-          sed -i "s|\${DB_PASS}|${{ secrets.DB_PASS }}|g"        api/config.php
-          sed -i "s|\${ADMIN_USERNAME}|${{ secrets.ADMIN_USERNAME }}|g" api/config.php
-          sed -i "s|\${ADMIN_PASSWORD}|${{ secrets.ADMIN_PASSWORD }}|g" api/config.php
+      - name: Installer lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
       - name: Déployer par FTP vers o2switch
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: ${{ secrets.FTP_SERVER_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            README.md
+        run: |
+          lftp -e "
+          set ssl:verify-certificate no;
+          open ${FTP_HOST};
+          user ${FTP_USER} ${FTP_PASSWORD};
+          mirror -R ./ ${FTP_SERVER_DIR} \
+            --verbose \
+            --delete \
+            --exclude-glob .git* \
+            --exclude-glob .github \
+            --exclude-glob README.md;
+          bye
+          "
