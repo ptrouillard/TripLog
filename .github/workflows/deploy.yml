@@ -1,0 +1,49 @@
+name: Deploy to o2switch
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Générer api/config.php depuis les secrets GitHub
+        run: |
+          cat > api/config.php << 'PHP'
+          <?php
+          define('DB_HOST',         '${DB_HOST}');
+          define('DB_PORT',         '${DB_PORT}');
+          define('DB_NAME',         '${DB_NAME}');
+          define('DB_USER',         '${DB_USER}');
+          define('DB_PASS',         '${DB_PASS}');
+          define('ADMIN_USERNAME',  '${ADMIN_USERNAME}');
+          define('ADMIN_PASSWORD',  '${ADMIN_PASSWORD}');
+          PHP
+
+          # Substitution des placeholders par les vraies valeurs
+          sed -i "s|\${DB_HOST}|${{ secrets.DB_HOST }}|g"        api/config.php
+          sed -i "s|\${DB_PORT}|${{ secrets.DB_PORT }}|g"        api/config.php
+          sed -i "s|\${DB_NAME}|${{ secrets.DB_NAME }}|g"        api/config.php
+          sed -i "s|\${DB_USER}|${{ secrets.DB_USER }}|g"        api/config.php
+          sed -i "s|\${DB_PASS}|${{ secrets.DB_PASS }}|g"        api/config.php
+          sed -i "s|\${ADMIN_USERNAME}|${{ secrets.ADMIN_USERNAME }}|g" api/config.php
+          sed -i "s|\${ADMIN_PASSWORD}|${{ secrets.ADMIN_PASSWORD }}|g" api/config.php
+
+      - name: Déployer par FTP vers o2switch
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_HOST }}
+          username: ${{ secrets.FTP_USER }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            README.md

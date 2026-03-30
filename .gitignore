@@ -1,0 +1,9 @@
+# Secrets et configuration serveur — jamais commités
+api/config.php
+
+# Dossier d'upload utilisateur
+uploads/
+
+# Système
+.DS_Store
+Thumbs.db
