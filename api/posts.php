@@ -29,7 +29,7 @@ if ($method === 'POST') {
     $video = trim((string)($payload['video'] ?? ''));
     $content = trim((string)($payload['content'] ?? ''));
 
-    if ($title === '' || $date === '' || $location === '' || $image === '' || $content === '') {
+    if ($title === '' || $date === '' || $location === '' || $content === '') {
         json_response(422, ['ok' => false, 'error' => 'Missing required fields.']);
     }
 

@@ -166,7 +166,7 @@ editorForm.addEventListener("submit", async event => {
   };
 
   const plain = toPlainText(payload.content);
-  const requiredFields = [payload.title, payload.date, payload.location, payload.image, plain];
+  const requiredFields = [payload.title, payload.date, payload.location, plain];
   if (requiredFields.some(field => !field)) {
     setStatus("Complete les champs obligatoires et le contenu du recit.", true);
     return;

@@ -25,13 +25,17 @@ function createPostCard(post, index) {
   card.style.animationDelay = `${Math.min(index * 80, 320)}ms`;
 
   const safeVideo = typeof post.video === "string" ? post.video.trim() : "";
+  const safeImage = typeof post.image === "string" ? post.image.trim() : "";
   const excerpt = getExcerpt(post);
+  const imageMarkup = safeImage
+    ? `<img src="${safeImage}" alt="${post.title}" loading="lazy" />`
+    : `<div class="image-placeholder" aria-hidden="true">Pas d image</div>`;
   const videoMarkup = safeVideo
     ? `<div class="video-wrap"><iframe src="${safeVideo}" title="Video ${post.title}" loading="lazy" allowfullscreen></iframe></div>`
     : "";
 
   card.innerHTML = `
-    <img src="${post.image}" alt="${post.title}" loading="lazy" />
+    ${imageMarkup}
     <div class="card-body">
       <p class="meta">${post.date} - ${post.location}</p>
       <h3>${post.title}</h3>
