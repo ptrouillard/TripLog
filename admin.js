@@ -268,8 +268,14 @@ async function init() {
     return;
   }
 
-  await loadState();
-  renderPostList();
+  try {
+    await loadState();
+    renderPostList();
+  } catch (error) {
+    setStatus(error.message || "Impossible de charger les voyages depuis la base.", true);
+    renderPostList();
+    return;
+  }
 
   if (state.posts[0]) {
     setActivePost(state.posts[0].id);

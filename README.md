@@ -11,7 +11,7 @@ Site vitrine de blog de voyages en HTML/CSS/JS vanilla.
 - Editeur WYSIWYG (rich text) pour le contenu des recits
 - Responsive mobile et desktop
 - Base MySQL/MariaDB via API PHP (compatible o2switch)
-- Fallback localStorage si l API n est pas disponible
+- Les voyages sont charges uniquement depuis la base de donnees
 
 ## Stack de persistance
 
@@ -39,7 +39,7 @@ python -m http.server 5500
 
 2. Ouvrez ensuite `http://localhost:5500` dans le navigateur.
 
-Note: avec ce mode Python, l API PHP ne tourne pas. Le site bascule automatiquement sur le fallback localStorage.
+Note: avec ce mode Python, l API PHP ne tourne pas. Le site ne pourra donc pas charger les voyages ni utiliser le back office.
 
 Option terminal PHP (pour tester la base en local):
 

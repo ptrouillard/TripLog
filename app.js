@@ -43,9 +43,27 @@ function createPostCard(post, index) {
   return card;
 }
 
+function createMessageCard(message) {
+  const card = document.createElement("article");
+  card.className = "post-card post-card-message";
+  card.innerHTML = `
+    <div class="card-body">
+      <h3>Aucun voyage a afficher</h3>
+      <p>${message}</p>
+    </div>
+  `;
+
+  return card;
+}
+
 async function renderPosts() {
-  state.posts = await window.TripStore.loadPosts();
   postGrid.innerHTML = "";
+  state.posts = await window.TripStore.loadPosts();
+
+  if (state.posts.length === 0) {
+    postGrid.appendChild(createMessageCard("La base de donnees ne contient encore aucun recit."));
+    return;
+  }
 
   state.posts.forEach((post, index) => {
     postGrid.appendChild(createPostCard(post, index));
@@ -69,7 +87,15 @@ function setupRevealOnScroll() {
 }
 
 async function init() {
-  await renderPosts();
+  try {
+    await renderPosts();
+  } catch (error) {
+    postGrid.innerHTML = "";
+    postGrid.appendChild(
+      createMessageCard(error.message || "Impossible de charger les voyages depuis la base de donnees.")
+    );
+  }
+
   setupRevealOnScroll();
 }
 
